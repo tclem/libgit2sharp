@@ -53,7 +53,7 @@ namespace LibGit2Sharp
             get
             {
                 var entryPtr = NativeMethods.git_index_get(handle, index);
-                return IndexEntry.CreateFromPtr(entryPtr);
+                return IndexEntry.CreateFromPtr(repo, entryPtr);
             }
         }
 
@@ -125,9 +125,7 @@ namespace LibGit2Sharp
         {
             Ensure.ArgumentNotNullOrEmptyString(path, "path");
 
-            string relativePath = BuildRelativePathFrom(path);
-
-            AddToIndex(relativePath);
+            AddToIndex(path);
 
             UpdatePhysicalIndex();
         }
@@ -136,7 +134,7 @@ namespace LibGit2Sharp
         {
             Ensure.ArgumentNotNullOrEmptyString(path, "path");
 
-            string relativePath = BuildRelativePathFrom(path);
+            string relativePath = BuildRelativePathFrom(repo, path);
 
             RemoveFromIndex(relativePath);
 
@@ -150,8 +148,8 @@ namespace LibGit2Sharp
             Ensure.ArgumentNotNullOrEmptyString(sourcePath, "sourcepath");
             Ensure.ArgumentNotNullOrEmptyString(destinationPath, "destinationpath");
 
-            string relativeSourcePath = BuildRelativePathFrom(sourcePath);
-            string relativeDestinationPath = BuildRelativePathFrom(destinationPath);
+            string relativeSourcePath = BuildRelativePathFrom(repo, sourcePath);
+            string relativeDestinationPath = BuildRelativePathFrom(repo, destinationPath);
 
             string wd = repo.Info.WorkingDirectory;
             if (Directory.Exists(Path.Combine(wd, relativeSourcePath)))
@@ -170,13 +168,13 @@ namespace LibGit2Sharp
 
         private void AddToIndex(string path)
         {
-            var res = NativeMethods.git_index_add(handle, BuildRelativePathFrom(path));
+            var res = NativeMethods.git_index_add(handle, BuildRelativePathFrom(repo, path));
             Ensure.Success(res);
         }
 
-        private void RemoveFromIndex(string relativePath)
+        private void RemoveFromIndex(string path)
         {
-            var res = NativeMethods.git_index_find(handle, relativePath);
+            var res = NativeMethods.git_index_find(handle, BuildRelativePathFrom(repo, path));
             Ensure.Success(res, true);
 
             res = NativeMethods.git_index_remove(handle, res);
@@ -201,7 +199,7 @@ namespace LibGit2Sharp
             Ensure.Success(res);
         }
 
-        private string BuildRelativePathFrom(string path)   //TODO: To be removed when libgit2 natively implements this
+        private static string BuildRelativePathFrom(Repository repo, string path)   //TODO: To be removed when libgit2 natively implements this
         {
             if (!Path.IsPathRooted(path))
             {
@@ -212,10 +210,36 @@ namespace LibGit2Sharp
 
             if (!normalizedPath.StartsWith(repo.Info.WorkingDirectory, StringComparison.Ordinal))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unable to stage file '{0}'. This file is not located under the working directory of the repository ('{1}').", normalizedPath, repo.Info.WorkingDirectory));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unable to process file '{0}'. This file is not located under the working directory of the repository ('{1}').", normalizedPath, repo.Info.WorkingDirectory));
             }
 
             return normalizedPath.Substring(repo.Info.WorkingDirectory.Length);
         }
+
+        public GitStatus RetrieveStatus(string filePath)
+        {
+            Ensure.ArgumentNotNullOrEmptyString(filePath, "filePath");
+
+            string relativePath = BuildRelativePathFrom(repo, filePath);
+
+            GitStatus status;
+
+            int res = NativeMethods.git_status_file(out status, repo.Handle, relativePath);
+            if (res == (int)GitErrorCode.GIT_ENOTFOUND)
+            {
+                return GitStatus.GIT_STATUS_NOTFOUND;
+            }
+
+            Ensure.Success(res);
+
+            return status;
+        }
+
+        public RepositoryStatus RetrieveStatus()
+        {
+            return new RepositoryStatus(repo.Handle);
+        }
+
+
     }
 }

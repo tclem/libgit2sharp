@@ -86,12 +86,6 @@ namespace LibGit2Sharp.Tests
         }
 
         [Test]
-        [Ignore("Not implemented yet.")]
-        public void CanStageAModifiedFile()
-        {
-        }
-
-        [Test]
         public void CanStageANewFile()
         {
             using (var path = new TemporaryCloneOfTestRepo(Constants.StandardTestRepoWorkingDirPath))
@@ -154,16 +148,25 @@ namespace LibGit2Sharp.Tests
                 using (var repo = new Repository(path.RepositoryPath))
                 {
                     const string filename = "unit_test.txt";
+                    repo.Index.RetrieveStatus(filename).ShouldEqual(GitStatus.GIT_STATUS_NOTFOUND);
+                    repo.Index[filename].ShouldBeNull();
+
                     File.WriteAllText(Path.Combine(repo.Info.WorkingDirectory, filename), "some contents");
+                    repo.Index.RetrieveStatus(filename).ShouldEqual(GitStatus.GIT_STATUS_WT_NEW);
+                    repo.Index[filename].ShouldBeNull();
 
                     repo.Index.Stage(filename);
                     repo.Index[filename].ShouldNotBeNull();
+                    repo.Index.RetrieveStatus(filename).ShouldEqual(GitStatus.GIT_STATUS_INDEX_NEW);
+                    repo.Index[filename].State.ShouldEqual(GitStatus.GIT_STATUS_INDEX_NEW);
                 }
 
                 using (var repo = new Repository(path.RepositoryPath))
                 {
                     const string filename = "unit_test.txt";
                     repo.Index[filename].ShouldNotBeNull();
+                    repo.Index.RetrieveStatus(filename).ShouldEqual(GitStatus.GIT_STATUS_INDEX_NEW);
+                    repo.Index[filename].State.ShouldEqual(GitStatus.GIT_STATUS_INDEX_NEW);
                 }
             }
         }
@@ -205,12 +208,6 @@ namespace LibGit2Sharp.Tests
         }
 
         [Test]
-        [Ignore("Not implemented yet.")]
-        public void CanStageAPath()
-        {
-        }
-
-        [Test]
         public void CanRenameAFile()
         {
             using (var scd = new SelfCleaningDirectory())
@@ -224,8 +221,16 @@ namespace LibGit2Sharp.Tests
                     const string oldName = "polite.txt";
                     string oldPath = Path.Combine(repo.Info.WorkingDirectory, oldName);
 
+                    //TODO: Retrieving status in an empty repository currently fails in libgit2
+                    repo.Index.RetrieveStatus(oldName).ShouldEqual(GitStatus.GIT_STATUS_NOTFOUND);
+
                     File.WriteAllText(oldPath, "hello test file\n", Encoding.ASCII);
+                    //TODO: Retrieving status in an empty repository currently fails in libgit2
+                    repo.Index.RetrieveStatus(oldName).ShouldEqual(GitStatus.GIT_STATUS_WT_NEW);
+
                     repo.Index.Stage(oldName);
+                    //TODO: Retrieving status in an empty repository currently fails in libgit2
+                    repo.Index.RetrieveStatus(oldName).ShouldEqual(GitStatus.GIT_STATUS_INDEX_NEW);
 
                     // Generated through
                     // $ echo "hello test file" | git hash-object --stdin
@@ -237,15 +242,22 @@ namespace LibGit2Sharp.Tests
                     Signature who = Constants.Signature;
                     repo.Commit(who, who, "Initial commit");
 
+                    repo.Index.RetrieveStatus(oldName).ShouldEqual(GitStatus.GIT_STATUS_CURRENT);
+
                     const string newName = "being.frakking.polite.txt";
 
                     repo.Index.Move(oldName, newName);
+                    repo.Index.RetrieveStatus(oldName).ShouldEqual(GitStatus.GIT_STATUS_INDEX_DELETED);
+                    repo.Index.RetrieveStatus(newName).ShouldEqual(GitStatus.GIT_STATUS_INDEX_NEW);
 
                     repo.Index.Count.ShouldEqual(1);
                     repo.Index[newName].Id.Sha.ShouldEqual((expectedHash));
 
                     who = who.TimeShift(TimeSpan.FromMinutes(5));
                     Commit commit = repo.Commit(who, who, "Fix file name");
+
+                    repo.Index.RetrieveStatus(oldName).ShouldEqual(GitStatus.GIT_STATUS_NOTFOUND);
+                    repo.Index.RetrieveStatus(newName).ShouldEqual(GitStatus.GIT_STATUS_CURRENT);
 
                     commit.Tree[newName].Target.Id.Sha.ShouldEqual(expectedHash);
                 }
@@ -264,11 +276,38 @@ namespace LibGit2Sharp.Tests
                 string fullPath = Path.Combine(repo.Info.WorkingDirectory, filename);
                 File.Exists(fullPath).ShouldBeTrue();
 
+                repo.Index.RetrieveStatus(filename).ShouldEqual(GitStatus.GIT_STATUS_WT_NEW);
+
                 repo.Index.Stage(filename);
                 repo.Index.Count.ShouldEqual(count + 1);
 
+                repo.Index.RetrieveStatus(filename).ShouldEqual(GitStatus.GIT_STATUS_INDEX_NEW);
+
                 repo.Index.Unstage(filename);
                 repo.Index.Count.ShouldEqual(count);
+
+                repo.Index.RetrieveStatus(filename).ShouldEqual(GitStatus.GIT_STATUS_WT_NEW);
+
+            }
+        }
+
+        [Test]
+        public void CanRetrieveTheStatusOfAFile()
+        {
+            using (var repo = new Repository(Constants.StandardTestRepoPath))
+            {
+                GitStatus status = repo.Index.RetrieveStatus("new_tracked_file.txt");
+                status.ShouldEqual(GitStatus.GIT_STATUS_INDEX_NEW);
+            }
+        }
+
+        [Test]
+        public void CanRetrieveTheStatusOfTheWholeWorkingDirectory()
+        {
+            using (var repo = new Repository(Constants.StandardTestRepoPath))
+            {
+                RepositoryStatus status = repo.Index.RetrieveStatus();
+                status.ShouldNotBeNull();
             }
         }
 
@@ -277,14 +316,8 @@ namespace LibGit2Sharp.Tests
         {
             using (var repo = new Repository(Constants.StandardTestRepoPath))
             {
-                Assert.Throws<ApplicationException>(() => repo.Index.Unstage("shadowcopy_of_a_unseen_ghost.txt"));
+                Assert.Throws<ApplicationException>(() => repo.Index.Unstage("shadowcopy_of_an_unseen_ghost.txt"));
             }
-        }
-
-        [Test]
-        [Ignore("Not implemented yet.")]
-        public void CanUnstageAModifiedFile()
-        {
         }
 
         [Test]
