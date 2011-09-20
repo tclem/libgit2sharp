@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using LibGit2Sharp.Core;
 
@@ -20,7 +21,7 @@ namespace LibGit2Sharp
         void Process(RepositorySafeHandle handle)
         {
             StringBuilder buffer = new StringBuilder(4096);
-            int res = NativeMethods.git_status_foreach(handle, buffer, buffer.Capacity, callback, IntPtr.Zero);
+            int res = NativeMethods.git_status_foreach(handle, callback, IntPtr.Zero);
             Ensure.Success(res);
         }
 

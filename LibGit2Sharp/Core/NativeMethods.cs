@@ -240,10 +240,10 @@ namespace LibGit2Sharp.Core
         [DllImport(libgit2)]
         public static extern int git_status_file(out GitStatus statusflags, RepositorySafeHandle repo, string filepath);
 
-        internal delegate int status_callback(string arg1, uint arg2, IntPtr arg3);
+        internal delegate int status_callback([MarshalAs(UnmanagedType.LPStr)]string arg1, uint arg2, IntPtr arg3);
 
         [DllImport(libgit2)]
-        public static extern int git_status_foreach(RepositorySafeHandle repo, StringBuilder repository_path, int size, status_callback callback, IntPtr payload);
+        public static extern int git_status_foreach(RepositorySafeHandle repo, status_callback callback, IntPtr payload);
 
         [DllImport(libgit2)]
         public static extern int git_tag_create(out GitOid oid, RepositorySafeHandle repo, string name, IntPtr target, GitSignature signature, string message, bool force);
