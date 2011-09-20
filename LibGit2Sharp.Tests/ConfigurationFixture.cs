@@ -51,7 +51,7 @@ namespace LibGit2Sharp.Tests
         public void CanGetGlobalStringValue()
         {
             using (var repo = new Repository(Constants.StandardTestRepoPath))
-            using (var config = new Configuration(repo, globalConfigFixture))
+            using (var config = new Configuration(repo))
             {
                 Assert.AreEqual("Tim Clem", config.Get<string>("user.name"));
             }
@@ -109,7 +109,7 @@ namespace LibGit2Sharp.Tests
         public void CanSetGlobalStringValue()
         {
             using (var repo = new Repository(Constants.StandardTestRepoPath))
-            using (var config = new Configuration(repo, globalConfigFixture))
+            using (var config = new Configuration(repo))
             {
                 var existing = config.Get<string>("user.name");
                 try

@@ -204,7 +204,7 @@ namespace LibGit2Sharp.Core
         public static extern IntPtr git_remote_url(RemoteSafeHandle remote);
 
         [DllImport(libgit2)]
-        public static extern int git_repository_config(out ConfigurationSafeHandle cfg, RepositorySafeHandle repo, string userConfigPath, string systemConfigPath);
+        public static extern int git_repository_config(out ConfigurationSafeHandle cfg, RepositorySafeHandle repo, string systemConfigPath);
 
         [DllImport(libgit2)]
         public static extern IntPtr git_repository_database(RepositorySafeHandle repository);

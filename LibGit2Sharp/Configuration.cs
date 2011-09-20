@@ -9,29 +9,13 @@ namespace LibGit2Sharp
     /// </summary>
     public class Configuration : IDisposable
     {
-        private readonly string globalGitConfig;
-        private readonly string homeDirectory;
-
         private readonly Repository repository;
         private ConfigurationSafeHandle globalHandle;
         private ConfigurationSafeHandle localHandle;
 
-        public Configuration(Repository repository, string userConfigFile = null)
+        public Configuration(Repository repository)
         {
             this.repository = repository;
-            if (userConfigFile == null)
-            {
-                homeDirectory = (Environment.OSVersion.Platform == PlatformID.Unix ||
-                                 Environment.OSVersion.Platform == PlatformID.MacOSX)
-                                    ? Environment.GetEnvironmentVariable("HOME")
-                                    : Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
-                if (homeDirectory != null)
-                    globalGitConfig = Path.Combine(homeDirectory, ".gitconfig");
-            }
-            else
-            {
-                globalGitConfig = new FileInfo(userConfigFile).FullName;
-            }
             Init();
         }
 
@@ -146,7 +130,7 @@ namespace LibGit2Sharp
 
         private void Init()
         {
-            Ensure.Success(NativeMethods.git_repository_config(out localHandle, repository.Handle, globalGitConfig, null));
+            Ensure.Success(NativeMethods.git_repository_config(out localHandle, repository.Handle, null));
             Ensure.Success(NativeMethods.git_config_open_global(out globalHandle));
         }
 
