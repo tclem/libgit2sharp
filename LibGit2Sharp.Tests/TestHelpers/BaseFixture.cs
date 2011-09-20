@@ -27,6 +27,16 @@ namespace LibGit2Sharp.Tests.TestHelpers
 
             string tempDotGit = Path.Combine(Constants.StandardTestRepoWorkingDirPath, "dot_git");
             Directory.Move(tempDotGit, Constants.StandardTestRepoPath);
+
+            // Hack! Those test files are part of the repository. When checked out on Windows with core.autocrlf config set to true, 
+            // LF are replace with CRLF. As git_status_xxx() doesn't handle LF/CRLF yet, we regenerate those files with a LF line ending character.
+            File.WriteAllText(Path.Combine(Constants.StandardTestRepoWorkingDirPath, "1/branch_file.txt"), "hi\n");
+            File.WriteAllText(Path.Combine(Constants.StandardTestRepoWorkingDirPath, "branch_file.txt"), "hi\n");
+            File.WriteAllText(Path.Combine(Constants.StandardTestRepoWorkingDirPath, "new.txt"), "my new file\n");
+            File.WriteAllText(Path.Combine(Constants.StandardTestRepoWorkingDirPath, "new_tracked_file.txt"), "a new file\n");
+            File.WriteAllText(Path.Combine(Constants.StandardTestRepoWorkingDirPath, "new_tracked_file.txt"), "a new file\n");
+            File.WriteAllText(Path.Combine(Constants.StandardTestRepoWorkingDirPath, "modified_staged_file.txt"), "a change\nmore files!\n");
+            File.WriteAllText(Path.Combine(Constants.StandardTestRepoWorkingDirPath, "README"), "hey there\n");
         }
 
         protected void CreateCorruptedDeadBeefHead(string repoPath)

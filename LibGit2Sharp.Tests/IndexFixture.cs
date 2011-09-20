@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using LibGit2Sharp.Tests.TestHelpers;
 using NUnit.Framework;
@@ -10,25 +10,25 @@ namespace LibGit2Sharp.Tests
     [TestFixture]
     public class IndexFixture : BaseFixture
     {
-        private readonly List<string> expectedEntries = new List<string>
-                                                            {
-                                                                "README",
-                                                                "new.txt",
-                                                                "branch_file.txt",
-                                                                "1/branch_file.txt",
-                                                                //"deleted_staged_file.txt",
-                                                                "deleted_unstaged_file.txt",
-                                                                "modified_staged_file.txt",
-                                                                "modified_unstaged_file.txt",
-                                                                "new_tracked_file.txt"
-                                                            };
+        private readonly string[] expectedEntries = new[]
+                                                        {
+                                                            "1/branch_file.txt",
+                                                            "README",
+                                                            "branch_file.txt",
+                                                            //"deleted_staged_file.txt",
+                                                            "deleted_unstaged_file.txt",
+                                                            "modified_staged_file.txt",
+                                                            "modified_unstaged_file.txt",
+                                                            "new.txt",
+                                                            "new_tracked_file.txt"
+                                                        };
 
         [Test]
         public void CanCountEntriesInIndex()
         {
             using (var repo = new Repository(Constants.StandardTestRepoPath))
             {
-                repo.Index.Count.ShouldEqual(expectedEntries.Count);
+                repo.Index.Count.ShouldEqual(expectedEntries.Count());
             }
         }
 
@@ -37,29 +37,8 @@ namespace LibGit2Sharp.Tests
         {
             using (var repo = new Repository(Constants.StandardTestRepoPath))
             {
-                foreach (IndexEntry entry in repo.Index)
-                {
-                    Assert.IsTrue(expectedEntries.Contains(entry.Path), string.Format("Could not find {0}", entry.Path));
-                }
+                CollectionAssert.AreEqual(expectedEntries, repo.Index.Select(e => e.Path).ToArray());
             }
-        }
-
-        [Test]
-        [Ignore("Not implemented yet.")]
-        public void CanEnumerateModifiedFiles()
-        {
-        }
-
-        [Test]
-        [Ignore("Not implemented yet.")]
-        public void CanEnumerateUntrackedFiles()
-        {
-        }
-
-        [Test]
-        [Ignore("Not implemented yet.")]
-        public void CanEnumeratorStagedFiles()
-        {
         }
 
         [Test]
@@ -83,12 +62,6 @@ namespace LibGit2Sharp.Tests
                 IndexEntry entry = repo.Index["I-do-not-exist.txt"];
                 entry.ShouldBeNull();
             }
-        }
-
-        [Test]
-        [Ignore("Not implemented yet.")]
-        public void CanStageAModifiedFile()
-        {
         }
 
         [Test]
@@ -154,16 +127,25 @@ namespace LibGit2Sharp.Tests
                 using (var repo = new Repository(path.RepositoryPath))
                 {
                     const string filename = "unit_test.txt";
+                    repo.Index.RetrieveStatus(filename).ShouldEqual(FileStatus.Nonexistent);
+                    repo.Index[filename].ShouldBeNull();
+
                     File.WriteAllText(Path.Combine(repo.Info.WorkingDirectory, filename), "some contents");
+                    repo.Index.RetrieveStatus(filename).ShouldEqual(FileStatus.Untracked);
+                    repo.Index[filename].ShouldBeNull();
 
                     repo.Index.Stage(filename);
                     repo.Index[filename].ShouldNotBeNull();
+                    repo.Index.RetrieveStatus(filename).ShouldEqual(FileStatus.Added);
+                    repo.Index[filename].State.ShouldEqual(FileStatus.Added);
                 }
 
                 using (var repo = new Repository(path.RepositoryPath))
                 {
                     const string filename = "unit_test.txt";
                     repo.Index[filename].ShouldNotBeNull();
+                    repo.Index.RetrieveStatus(filename).ShouldEqual(FileStatus.Added);
+                    repo.Index[filename].State.ShouldEqual(FileStatus.Added);
                 }
             }
         }
@@ -205,12 +187,6 @@ namespace LibGit2Sharp.Tests
         }
 
         [Test]
-        [Ignore("Not implemented yet.")]
-        public void CanStageAPath()
-        {
-        }
-
-        [Test]
         public void CanRenameAFile()
         {
             using (var scd = new SelfCleaningDirectory())
@@ -224,8 +200,13 @@ namespace LibGit2Sharp.Tests
                     const string oldName = "polite.txt";
                     string oldPath = Path.Combine(repo.Info.WorkingDirectory, oldName);
 
+                    repo.Index.RetrieveStatus(oldName).ShouldEqual(FileStatus.Nonexistent);
+
                     File.WriteAllText(oldPath, "hello test file\n", Encoding.ASCII);
+                    repo.Index.RetrieveStatus(oldName).ShouldEqual(FileStatus.Untracked);
+
                     repo.Index.Stage(oldName);
+                    repo.Index.RetrieveStatus(oldName).ShouldEqual(FileStatus.Added);
 
                     // Generated through
                     // $ echo "hello test file" | git hash-object --stdin
@@ -237,15 +218,22 @@ namespace LibGit2Sharp.Tests
                     Signature who = Constants.Signature;
                     repo.Commit(who, who, "Initial commit");
 
+                    repo.Index.RetrieveStatus(oldName).ShouldEqual(FileStatus.Unaltered);
+
                     const string newName = "being.frakking.polite.txt";
 
                     repo.Index.Move(oldName, newName);
+                    repo.Index.RetrieveStatus(oldName).ShouldEqual(FileStatus.Removed);
+                    repo.Index.RetrieveStatus(newName).ShouldEqual(FileStatus.Added);
 
                     repo.Index.Count.ShouldEqual(1);
                     repo.Index[newName].Id.Sha.ShouldEqual((expectedHash));
 
                     who = who.TimeShift(TimeSpan.FromMinutes(5));
                     Commit commit = repo.Commit(who, who, "Fix file name");
+
+                    repo.Index.RetrieveStatus(oldName).ShouldEqual(FileStatus.Nonexistent);
+                    repo.Index.RetrieveStatus(newName).ShouldEqual(FileStatus.Unaltered);
 
                     commit.Tree[newName].Target.Id.Sha.ShouldEqual(expectedHash);
                 }
@@ -264,11 +252,94 @@ namespace LibGit2Sharp.Tests
                 string fullPath = Path.Combine(repo.Info.WorkingDirectory, filename);
                 File.Exists(fullPath).ShouldBeTrue();
 
+                repo.Index.RetrieveStatus(filename).ShouldEqual(FileStatus.Untracked);
+
                 repo.Index.Stage(filename);
                 repo.Index.Count.ShouldEqual(count + 1);
 
+                repo.Index.RetrieveStatus(filename).ShouldEqual(FileStatus.Added);
+
                 repo.Index.Unstage(filename);
                 repo.Index.Count.ShouldEqual(count);
+
+                repo.Index.RetrieveStatus(filename).ShouldEqual(FileStatus.Untracked);
+            }
+        }
+
+        [Test]
+        public void CanRetrieveTheStatusOfAFile()
+        {
+            using (var repo = new Repository(Constants.StandardTestRepoPath))
+            {
+                FileStatus status = repo.Index.RetrieveStatus("new_tracked_file.txt");
+                status.ShouldEqual(FileStatus.Added);
+            }
+        }
+
+        [Test]
+        public void CanRetrieveTheStatusOfTheWholeWorkingDirectory()
+        {
+            using (var path = new TemporaryCloneOfTestRepo(Constants.StandardTestRepoWorkingDirPath))
+            using (var repo = new Repository(path.RepositoryPath))
+            {
+                const string file = "modified_staged_file.txt";
+
+                RepositoryStatus status = repo.Index.RetrieveStatus();
+
+                IndexEntry indexEntry = repo.Index[file];
+                indexEntry.State.ShouldEqual(FileStatus.Staged);
+
+                status.ShouldNotBeNull();
+                status.Count().ShouldEqual(6);
+                status.IsDirty.ShouldBeTrue();
+
+                status.Untracked.Single().ShouldEqual("new_untracked_file.txt");
+                status.Modified.Single().ShouldEqual("modified_unstaged_file.txt");
+                status.Missing.Single().ShouldEqual("deleted_unstaged_file.txt");
+                status.Added.Single().ShouldEqual("new_tracked_file.txt");
+                status.Staged.Single().ShouldEqual(file);
+                status.Removed.Single().ShouldEqual("deleted_staged_file.txt");
+
+                File.AppendAllText(Path.Combine(repo.Info.WorkingDirectory, file), "Tclem's favorite commit message: boom");
+
+                indexEntry.State.ShouldEqual(FileStatus.Staged | FileStatus.Modified);
+
+                RepositoryStatus status2 = repo.Index.RetrieveStatus();
+
+                status2.ShouldNotBeNull();
+                status2.Count().ShouldEqual(6);
+                status2.IsDirty.ShouldBeTrue();
+
+                status2.Untracked.Single().ShouldEqual("new_untracked_file.txt");
+                CollectionAssert.AreEqual(new[] { file, "modified_unstaged_file.txt" }, status2.Modified);
+                status2.Missing.Single().ShouldEqual("deleted_unstaged_file.txt");
+                status2.Added.Single().ShouldEqual("new_tracked_file.txt");
+                status2.Staged.Single().ShouldEqual(file);
+                status2.Removed.Single().ShouldEqual("deleted_staged_file.txt");
+            }
+        }
+
+        [Test]
+        public void CanRetrieveTheStatusOfANewRepository()
+        {
+            using (var scd = new SelfCleaningDirectory())
+            {
+                string dir = Repository.Init(scd.DirectoryPath);
+
+                using (var repo = new Repository(dir))
+                {
+                    RepositoryStatus status = repo.Index.RetrieveStatus();
+                    status.ShouldNotBeNull();
+                    status.Count().ShouldEqual(0);
+                    status.IsDirty.ShouldBeFalse();
+
+                    status.Untracked.Count().ShouldEqual(0);
+                    status.Modified.Count().ShouldEqual(0);
+                    status.Missing.Count().ShouldEqual(0);
+                    status.Added.Count().ShouldEqual(0);
+                    status.Staged.Count().ShouldEqual(0);
+                    status.Removed.Count().ShouldEqual(0);
+                }
             }
         }
 
@@ -277,14 +348,8 @@ namespace LibGit2Sharp.Tests
         {
             using (var repo = new Repository(Constants.StandardTestRepoPath))
             {
-                Assert.Throws<LibGit2Exception>(() => repo.Index.Unstage("shadowcopy_of_a_unseen_ghost.txt"));
+                Assert.Throws<LibGit2Exception>(() => repo.Index.Unstage("shadowcopy_of_an_unseen_ghost.txt"));
             }
-        }
-
-        [Test]
-        [Ignore("Not implemented yet.")]
-        public void CanUnstageAModifiedFile()
-        {
         }
 
         [Test]
