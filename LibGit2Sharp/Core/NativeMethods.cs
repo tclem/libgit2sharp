@@ -35,9 +35,6 @@ namespace LibGit2Sharp.Core
         public static extern IntPtr git_commit_message(IntPtr commit);
 
         [DllImport(libgit2)]
-        public static extern IntPtr git_commit_message_short(IntPtr commit);
-
-        [DllImport(libgit2)]
         public static extern int git_commit_parent(out IntPtr parentCommit, IntPtr commit, uint n);
 
         [DllImport(libgit2)]

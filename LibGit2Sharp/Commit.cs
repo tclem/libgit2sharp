@@ -14,7 +14,8 @@ namespace LibGit2Sharp
         private readonly Lazy<IEnumerable<Commit>> parents;
         private readonly Lazy<Tree> tree;
 
-        internal Commit(ObjectId id, ObjectId treeId, Repository repo) : base(id)
+        internal Commit(ObjectId id, ObjectId treeId, Repository repo)
+            : base(id)
         {
             this.tree = new Lazy<Tree>(() => repo.Lookup<Tree>(treeId));
             this.parents = new Lazy<IEnumerable<Commit>>(() => RetrieveParentsOfCommit(id.Oid));
@@ -26,10 +27,15 @@ namespace LibGit2Sharp
         /// </summary>
         public string Message { get; private set; }
 
+        private string messageShort;
+
         /// <summary>
         ///   Gets the short commit message which is usually the first line of the commit.
         /// </summary>
-        public string MessageShort { get; private set; }
+        public string MessageShort
+        {
+            get { return messageShort ?? (messageShort = Message.Split('\n')[0]); }
+        }
 
         /// <summary>
         ///   Gets the author of this commit.
@@ -82,12 +88,11 @@ namespace LibGit2Sharp
         internal static Commit BuildFromPtr(IntPtr obj, ObjectId id, Repository repo)
         {
             var treeId =
-                new ObjectId((GitOid) Marshal.PtrToStructure(NativeMethods.git_commit_tree_oid(obj), typeof (GitOid)));
+                new ObjectId((GitOid)Marshal.PtrToStructure(NativeMethods.git_commit_tree_oid(obj), typeof(GitOid)));
 
             return new Commit(id, treeId, repo)
             {
                 Message = NativeMethods.git_commit_message(obj).MarshallAsString(),
-                MessageShort = NativeMethods.git_commit_message_short(obj).MarshallAsString(),
                 Author = new Signature(NativeMethods.git_commit_author(obj)),
                 Committer = new Signature(NativeMethods.git_commit_committer(obj)),
             };
