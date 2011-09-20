@@ -117,7 +117,7 @@ namespace LibGit2Sharp
             {
                 var parentPtrs = BuildArrayFrom(headPtr);
                 res = NativeMethods.git_commit_create(out commitOid, repo.Handle, head.CanonicalName, author.Handle,
-                                                  committer.Handle, message, treePtr.ObjectPtr, parentPtrs.Count(), parentPtrs);
+                                                  committer.Handle, null, message, treePtr.ObjectPtr, parentPtrs.Count(), parentPtrs);
             }
             Ensure.Success(res);
 

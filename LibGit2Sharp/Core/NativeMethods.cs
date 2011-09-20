@@ -26,6 +26,7 @@ namespace LibGit2Sharp.Core
             [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof (UTF8Marshaler))] string updateRef,
             GitSignature author,
             GitSignature committer,
+            [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof (UTF8Marshaler))] string messageEncoding,
             [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof (UTF8Marshaler))] string message,
             IntPtr tree,
             int parentCount,
