@@ -274,7 +274,8 @@ namespace LibGit2Sharp.Core
         public static extern void git_signature_free(IntPtr signature);
 
         [DllImport(libgit2)]
-        public static extern IntPtr git_signature_new(
+        public static extern int git_signature_new(
+            out IntPtr signature,
             [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof (UTF8Marshaler))] string name,
             [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof (UTF8Marshaler))] string email,
             long time,

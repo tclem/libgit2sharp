@@ -12,13 +12,9 @@ namespace LibGit2Sharp
         private readonly GitSignature handle = new GitSignature();
         private DateTimeOffset? when;
 
-        internal Signature(IntPtr signaturePtr, bool ownedByRepo = true)
+        internal Signature(IntPtr signaturePtr)
         {
             Marshal.PtrToStructure(signaturePtr, handle);
-            if (!ownedByRepo)
-            {
-                NativeMethods.git_signature_free(signaturePtr);
-            }
         }
 
         /// <summary>
@@ -28,8 +24,19 @@ namespace LibGit2Sharp
         /// <param name = "email">The email.</param>
         /// <param name = "when">The when.</param>
         public Signature(string name, string email, DateTimeOffset when)
-            : this(NativeMethods.git_signature_new(name, email, when.ToSecondsSinceEpoch(), (int) when.Offset.TotalMinutes), false)
         {
+            IntPtr ptr;
+            Ensure.Success(NativeMethods.git_signature_new(out ptr, name, email, when.ToSecondsSinceEpoch(), (int) when.Offset.TotalMinutes));
+            Marshal.PtrToStructure(ptr, handle);
+            NativeMethods.git_signature_free(ptr);
+        }
+
+        /// <summary>
+        ///   Gets the email.
+        /// </summary>
+        public string Email
+        {
+            get { return handle.Email; }
         }
 
         internal GitSignature Handle
@@ -43,14 +50,6 @@ namespace LibGit2Sharp
         public string Name
         {
             get { return handle.Name; }
-        }
-
-        /// <summary>
-        ///   Gets the email.
-        /// </summary>
-        public string Email
-        {
-            get { return handle.Email; }
         }
 
         /// <summary>
