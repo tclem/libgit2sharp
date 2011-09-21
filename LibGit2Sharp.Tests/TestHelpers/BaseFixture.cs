@@ -12,12 +12,12 @@ namespace LibGit2Sharp.Tests.TestHelpers
 
         private static void SetUpTestEnvironment()
         {
-            var source = new DirectoryInfo(@"../../../Resources");
-            var target = new DirectoryInfo(@"Resources");
+            var source = new DirectoryInfo(Path.Combine(Constants.GetTestRootDirectory(), "Resources"));
+            var target = new DirectoryInfo(@".\Resources");
 
             if (target.Exists)
             {
-                target.Delete(recursive: true);
+                target.Delete(true);
             }
 
             DirectoryHelper.CopyFilesRecursively(source, target);
