@@ -34,7 +34,14 @@ namespace LibGit2Sharp
         /// </summary>
         public string MessageShort
         {
-            get { return messageShort ?? (messageShort = Message.Split('\n')[0]); }
+            get
+            {
+                if (messageShort == null)
+                {
+                    messageShort = string.IsNullOrEmpty(Message) ? string.Empty : Message.Split('\n')[0];
+                }
+                return messageShort;
+            }
         }
 
         /// <summary>
