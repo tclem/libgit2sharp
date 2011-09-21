@@ -42,7 +42,7 @@ namespace LibGit2Sharp.Tests
                     repo.Config.Delete("unittests.boolsetting");
                     repo.Config.Save();
 
-                    Assert.Throws<ApplicationException>(() => repo.Config.Get<bool>("unittests.boolsetting"));
+                    Assert.Throws<LibGit2Exception>(() => repo.Config.Get<bool>("unittests.boolsetting"));
                 }
             }
         }
@@ -177,10 +177,10 @@ namespace LibGit2Sharp.Tests
         {
             using (var repo = new Repository(Constants.StandardTestRepoPath))
             {
-                Assert.Throws<ApplicationException>(() => repo.Config.Get<string>("unittests.ghostsetting"));
-                Assert.Throws<ApplicationException>(() => repo.Config.Get<int>("unittests.ghostsetting"));
-                Assert.Throws<ApplicationException>(() => repo.Config.Get<long>("unittests.ghostsetting"));
-                Assert.Throws<ApplicationException>(() => repo.Config.Get<bool>("unittests.ghostsetting"));
+                Assert.Throws<LibGit2Exception>(() => repo.Config.Get<string>("unittests.ghostsetting"));
+                Assert.Throws<LibGit2Exception>(() => repo.Config.Get<int>("unittests.ghostsetting"));
+                Assert.Throws<LibGit2Exception>(() => repo.Config.Get<long>("unittests.ghostsetting"));
+                Assert.Throws<LibGit2Exception>(() => repo.Config.Get<bool>("unittests.ghostsetting"));
             }
         }
 
