@@ -9,8 +9,8 @@ namespace LibGit2Sharp
     /// </summary>
     public class Signature
     {
-        private readonly GitSignature handle = new GitSignature();
-        private DateTimeOffset? when;
+        readonly GitSignature handle = new GitSignature();
+        DateTimeOffset? when;
 
         internal Signature(IntPtr signaturePtr)
         {
@@ -26,10 +26,12 @@ namespace LibGit2Sharp
         public Signature(string name, string email, DateTimeOffset when)
         {
             IntPtr ptr;
-            Ensure.Success(NativeMethods.git_signature_new(out ptr, name, email, when.ToSecondsSinceEpoch(), (int) when.Offset.TotalMinutes));
+            Ensure.Success(NativeMethods.git_signature_new(out ptr, name, email, when.ToSecondsSinceEpoch(), (int)when.Offset.TotalMinutes));
             Marshal.PtrToStructure(ptr, handle);
             NativeMethods.git_signature_free(ptr);
         }
+
+        #region Public Properties
 
         /// <summary>
         ///   Gets the email.
@@ -66,5 +68,7 @@ namespace LibGit2Sharp
                 return when.Value;
             }
         }
+
+        #endregion
     }
 }
