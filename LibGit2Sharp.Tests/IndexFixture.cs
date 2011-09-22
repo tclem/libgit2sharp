@@ -26,7 +26,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanCountEntriesInIndex()
         {
-            using (var repo = new Repository(Constants.StandardTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 repo.Index.Count.ShouldEqual(expectedEntries.Count());
             }
@@ -35,7 +35,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanEnumerateIndex()
         {
-            using (var repo = new Repository(Constants.StandardTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 CollectionAssert.AreEqual(expectedEntries, repo.Index.Select(e => e.Path).ToArray());
             }
@@ -44,7 +44,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanFetchAnIndexEntryByItsName()
         {
-            using (var repo = new Repository(Constants.StandardTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 IndexEntry entry = repo.Index["README"];
                 entry.Path.ShouldEqual("README");
@@ -57,7 +57,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void FetchingAnUnknwonIndexEntryReturnsNull()
         {
-            using (var repo = new Repository(Constants.StandardTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 IndexEntry entry = repo.Index["I-do-not-exist.txt"];
                 entry.ShouldBeNull();
@@ -67,7 +67,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanStageANewFile()
         {
-            using (var path = new TemporaryCloneOfTestRepo(Constants.StandardTestRepoWorkingDirPath))
+            using (var path = new TemporaryCloneOfTestRepo(Constants.StandardTestRepoWorkingDirName))
             using (var repo = new Repository(path.RepositoryPath))
             {
                 int count = repo.Index.Count;
@@ -122,7 +122,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanStageANewFileInAPersistentManner()
         {
-            using (var path = new TemporaryCloneOfTestRepo(Constants.StandardTestRepoPath))
+            using (var path = new TemporaryCloneOfTestRepo(Constants.StandardTestRepoWorkingDirName))
             {
                 using (var repo = new Repository(path.RepositoryPath))
                 {
@@ -153,7 +153,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanStageANewFileWithAFullPath()
         {
-            using (var path = new TemporaryCloneOfTestRepo(Constants.StandardTestRepoWorkingDirPath))
+            using (var path = new TemporaryCloneOfTestRepo(Constants.StandardTestRepoWorkingDirName))
             using (var repo = new Repository(path.RepositoryPath))
             {
                 int count = repo.Index.Count;
@@ -173,7 +173,7 @@ namespace LibGit2Sharp.Tests
         public void StagingANewFileWithAFullPathWhichEscapesOutOfTheWorkingDirThrows()
         {
             using (var scd = new SelfCleaningDirectory())
-            using (var path = new TemporaryCloneOfTestRepo(Constants.StandardTestRepoWorkingDirPath))
+            using (var path = new TemporaryCloneOfTestRepo(Constants.StandardTestRepoWorkingDirName))
             using (var repo = new Repository(path.RepositoryPath))
             {
                 DirectoryInfo di = Directory.CreateDirectory(scd.DirectoryPath);
@@ -243,7 +243,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanUnstageANewFile()
         {
-            using (var path = new TemporaryCloneOfTestRepo(Constants.StandardTestRepoWorkingDirPath))
+            using (var path = new TemporaryCloneOfTestRepo(Constants.StandardTestRepoWorkingDirName))
             using (var repo = new Repository(path.RepositoryPath))
             {
                 int count = repo.Index.Count;
@@ -269,7 +269,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanRetrieveTheStatusOfAFile()
         {
-            using (var repo = new Repository(Constants.StandardTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 FileStatus status = repo.Index.RetrieveStatus("new_tracked_file.txt");
                 status.ShouldEqual(FileStatus.Added);
@@ -279,7 +279,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanRetrieveTheStatusOfTheWholeWorkingDirectory()
         {
-            using (var path = new TemporaryCloneOfTestRepo(Constants.StandardTestRepoWorkingDirPath))
+            using (var path = new TemporaryCloneOfTestRepo(Constants.StandardTestRepoWorkingDirName))
             using (var repo = new Repository(path.RepositoryPath))
             {
                 const string file = "modified_staged_file.txt";
@@ -346,7 +346,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void UnstagingANonStagedFileThrows()
         {
-            using (var repo = new Repository(Constants.StandardTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 Assert.Throws<LibGit2Exception>(() => repo.Index.Unstage("shadowcopy_of_an_unseen_ghost.txt"));
             }
@@ -355,7 +355,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void ReadIndexWithBadParamsFails()
         {
-            using (var repo = new Repository(Constants.StandardTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 Assert.Throws<ArgumentNullException>(() => { IndexEntry entry = repo.Index[null]; });
                 Assert.Throws<ArgumentException>(() => { IndexEntry entry = repo.Index[string.Empty]; });
@@ -365,7 +365,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void StageFileWithBadParamsThrows()
         {
-            using (var repo = new Repository(Constants.StandardTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 Assert.Throws<ArgumentException>(() => repo.Index.Stage(string.Empty));
                 Assert.Throws<ArgumentNullException>(() => repo.Index.Stage(null));
@@ -375,7 +375,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void UnstagingFileWithBadParamsThrows()
         {
-            using (var repo = new Repository(Constants.StandardTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 Assert.Throws<ArgumentException>(() => repo.Index.Stage(string.Empty));
                 Assert.Throws<ArgumentNullException>(() => repo.Index.Stage(null));

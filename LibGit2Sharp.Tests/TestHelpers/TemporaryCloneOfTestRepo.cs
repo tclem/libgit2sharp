@@ -25,13 +25,13 @@ namespace LibGit2Sharp.Tests.TestHelpers
         }
 
         static object _gate = 42;
-        static Dictionary<string, TemporaryCloneOfTestRepo> readOnlyRepoCopies = new Dictionary<string, TemporaryCloneOfTestRepo>();
+        static Dictionary<string, TemporaryCloneOfTestRepo> _readOnlyRepoCopies = new Dictionary<string, TemporaryCloneOfTestRepo>();
         public static TemporaryCloneOfTestRepo ReadOnlyRepo(string sourceZipFile = null)
         {
             lock(_gate)
             {
                 var key = sourceZipFile ?? "__NULL__";
-                if (readOnlyRepoCopies.ContainsKey(key))
+                if (_readOnlyRepoCopies.ContainsKey(key))
                 {
                     return readOnlyRepoCopies[key];
                 }

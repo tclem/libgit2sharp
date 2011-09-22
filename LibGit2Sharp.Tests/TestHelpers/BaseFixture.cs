@@ -20,6 +20,13 @@ namespace LibGit2Sharp.Tests.TestHelpers
             TemporaryCloneOfTestRepo.DisposeReadOnlyRepos();
         }
 
+        protected void CreateCorruptedDeadBeefHead(string repoPath)
+        {
+            const string deadbeef = "deadbeef";
+            string headPath = string.Format("{0}refs/heads/{1}", repoPath, deadbeef);
+            File.WriteAllText(headPath, string.Format("{0}{0}{0}{0}{0}\n", deadbeef));
+        }
+
         static bool sevenZipIsExtracted;
         static void SetUpTestEnvironment()
         {
@@ -71,5 +78,7 @@ namespace LibGit2Sharp.Tests.TestHelpers
             var di = new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
             return di.FullName;
         }
+
+        
     }
 }

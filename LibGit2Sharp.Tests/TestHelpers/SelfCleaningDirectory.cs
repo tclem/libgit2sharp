@@ -11,11 +11,6 @@ namespace LibGit2Sharp.Tests.TestHelpers
 
         public SelfCleaningDirectory(string path)
         {
-            if (Directory.Exists(path))
-            {
-                throw new InvalidOperationException(string.Format("Directory '{0}' already exists.", path));
-            }
-
             DirectoryPath = Path.GetFullPath(path);
         }
 
@@ -27,7 +22,7 @@ namespace LibGit2Sharp.Tests.TestHelpers
         {
             if (!Directory.Exists(DirectoryPath))
             {
-                throw new InvalidOperationException(string.Format("Directory '{0}' doesn't exist any longer.", DirectoryPath));
+                throw new InvalidOperationException(String.Format("Directory '{0}' doesn't exist any longer.", DirectoryPath));
             }
 
             DirectoryHelper.DeleteDirectory(DirectoryPath);
@@ -37,7 +32,7 @@ namespace LibGit2Sharp.Tests.TestHelpers
 
         protected static string BuildTempPath()
         {
-            var di = new DirectoryInfo(Path.Combine(Path.GetTempPath(), "LibGit2Sharp-" + Guid.NewGuid().ToString().Substring(0, 8)));
+            var di = new DirectoryInfo(Path.Combine(Path.GetTempPath(), "LibGit2Sharp-" + Guid.NewGuid()));
             if (!di.Exists)
             {
                 di.Create();
