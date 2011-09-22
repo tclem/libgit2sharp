@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Reflection;
+using SevenZip;
 
 namespace LibGit2Sharp.Tests.TestHelpers
 {
@@ -10,23 +13,56 @@ namespace LibGit2Sharp.Tests.TestHelpers
             SetUpTestEnvironment();
         }
 
-        private static void SetUpTestEnvironment()
+        static bool sevenZipIsExtracted;
+        static void SetUpTestEnvironment()
         {
-            var source = new DirectoryInfo(Path.Combine(Constants.GetTestRootDirectory(), "Resources"));
-            var target = new DirectoryInfo(@".\Resources");
-
-            if (target.Exists)
+            if (sevenZipIsExtracted)
             {
-                target.Delete(true);
+                return;
             }
 
-            DirectoryHelper.CopyFilesRecursively(source, target);
+            Initialize7Zip();
+            sevenZipIsExtracted = true;
+        }
 
-            // The test repo under source control has its .git folder renamed to dot_git to avoid confusing git,
-            // so we need to rename it back to .git in our copy under the target folder
+        public static void Initialize7Zip()
+        {
+            string sevenZipPath = GetPathTo7ZipNative();
+            if (sevenZipPath == null)
+            {
+                throw new Exception("Can't find or extract 7Zip");
+            }
 
-            string tempDotGit = Path.Combine(Constants.StandardTestRepoWorkingDirPath, "dot_git");
-            Directory.Move(tempDotGit, Constants.StandardTestRepoPath);
+            SevenZipBase.SetLibraryPath(sevenZipPath);
+        }
+
+        static string GetPathTo7ZipNative()
+        {
+            // Is it already here? Just return it
+            var fi = new FileInfo(@".\7z.dll");
+            if (fi.Exists)
+            {
+                return fi.FullName;
+            }
+
+            // Let's try to extract it to the same folder as the test DLL - if 
+            // it doesn't work, we will fall back to a temp folder
+            var outPath = Path.Combine(GetTestDllDirectory(), "7z.dll");
+
+            string ret = null;
+            if ((ret = AssemblyExtensions.ExtractResourceToFile(null, "LibGit2Sharp.Tests.data.7z.dll", outPath)) != null)
+            {
+                return ret;
+            }
+            
+            outPath = Path.GetTempFileName();
+            return AssemblyExtensions.ExtractResourceToFile(null, "LibGit2Sharp.Tests.data.7z.dll", outPath);
+        }
+
+        static string GetTestDllDirectory()
+        {
+            var di = new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            return di.FullName;
         }
     }
 }

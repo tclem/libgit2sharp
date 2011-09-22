@@ -1,36 +1,27 @@
 ﻿using System.IO;
+using SevenZip;
 
 namespace LibGit2Sharp.Tests.TestHelpers
 {
     public class TemporaryCloneOfTestRepo : SelfCleaningDirectory
     {
-        public TemporaryCloneOfTestRepo(string sourceDirectoryPath = null)
+        public TemporaryCloneOfTestRepo(string sourceZipFile = null)
         {
-            sourceDirectoryPath = sourceDirectoryPath ?? Constants.BareTestRepoPath;
+            sourceZipFile = sourceZipFile ?? Constants.BareTestRepoName;
 
-            var source = new DirectoryInfo(sourceDirectoryPath);
+            var extractor = new SevenZipExtractor(sourceZipFile);
+            extractor.ExtractArchive(DirectoryPath);
 
-            if (Directory.Exists(Path.Combine(sourceDirectoryPath, ".git")))
-            {
-                // If there is a .git subfolder, we're dealing with a non-bare repo and we have to
-                // copy the working folder as well
-
-                RepositoryPath = Path.Combine(DirectoryPath, ".git");
-
-                DirectoryHelper.CopyFilesRecursively(source, new DirectoryInfo(DirectoryPath));
-            }
-            else
-            {
-                // It's a bare repo
-
-                var tempRepository = new DirectoryInfo(Path.Combine(DirectoryPath, source.Name));
-
-                RepositoryPath = tempRepository.FullName;
-
-                DirectoryHelper.CopyFilesRecursively(source, tempRepository);
-            }
+            RepositoryPath = (IsGitWorkingDir() ? Path.Combine(DirectoryPath, ".git") : DirectoryPath);
         }
 
         public string RepositoryPath { get; private set; }
+
+        bool IsGitWorkingDir()
+        {
+            var di = new DirectoryInfo(Path.Combine(DirectoryPath, ".git"));
+            return di.Exists;
+        }
     }
+
 }

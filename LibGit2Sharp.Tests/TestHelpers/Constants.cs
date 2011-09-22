@@ -6,16 +6,11 @@ namespace LibGit2Sharp.Tests.TestHelpers
 {
     public static class Constants
     {
-        public const string BareTestRepoSubPath = "./Resources/testrepo.git";
-        public static readonly string BareTestRepoPath = Path.Combine(GetTestRootDirectory(), BareTestRepoSubPath);
+        public const string BareTestRepoName = "testrepo.git.7z";
+        public const string StandardTestRepoWorkingDirName = "testrepo_wd.7z";
 
-        public const string StandardTestRepoWorkingDirSubPath = "./Resources/testrepo_wd";
-        public static readonly string StandardTestRepoWorkingDirPath = Path.Combine(GetTestRootDirectory(), StandardTestRepoWorkingDirSubPath);
+        public static readonly string TestRepoPath = Path.Combine(GetTestRootDirectory(), "Resources");
 
-        public static readonly string StandardTestRepoSubPath = Path.Combine(StandardTestRepoWorkingDirSubPath, ".git");
-        public static readonly string StandardTestRepoPath = Path.Combine(GetTestRootDirectory(), StandardTestRepoSubPath);
-
-        public const string TemporaryReposPath = "TestRepos";
         public const string UnknownSha = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
         public static readonly Signature Signature = new Signature("A. U. Thor", "thor@valhalla.asgard.com", new DateTimeOffset(2011, 06, 16, 10, 58, 27, TimeSpan.FromHours(2)));
 
