@@ -307,14 +307,14 @@ namespace LibGit2Sharp.Tests
         public void CanDiscoverABareRepoGivenTheRepoPath()
         {
             string path = Repository.Discover(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath);
-            path.ShouldEqual(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath);
+            path.ShouldEqual(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath + Path.DirectorySeparatorChar);
         }
 
         [Test]
         public void CanDiscoverABareRepoGivenASubDirectoryOfTheRepoPath()
         {
             string path = Repository.Discover(Path.Combine(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath, "objects/4a"));
-            path.ShouldEqual(Path.GetFullPath(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath));
+            path.ShouldEqual(Path.GetFullPath(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath) + Path.DirectorySeparatorChar);
         }
 
         [Test]

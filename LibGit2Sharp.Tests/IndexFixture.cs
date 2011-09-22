@@ -26,7 +26,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanCountEntriesInIndex()
         {
-            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).DirectoryPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 repo.Index.Count.ShouldEqual(expectedEntries.Count);
             }
@@ -35,7 +35,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanEnumerateIndex()
         {
-            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).DirectoryPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 foreach (var entry in repo.Index)
                 {
@@ -65,7 +65,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanFetchAnIndexEntryByItsName()
         {
-            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).DirectoryPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 var entry = repo.Index["README"];
                 entry.Path.ShouldEqual("README");
@@ -78,7 +78,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void FetchingAnUnknwonIndexEntryReturnsNull()
         {
-            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).DirectoryPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 var entry = repo.Index["I-do-not-exist.txt"];
                 entry.ShouldBeNull();
@@ -275,7 +275,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void UnstagingANonStagedFileThrows()
         {
-            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).DirectoryPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 Assert.Throws<ApplicationException>(() => repo.Index.Unstage("shadowcopy_of_a_unseen_ghost.txt"));
             }
@@ -290,7 +290,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void ReadIndexWithBadParamsFails()
         {
-            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).DirectoryPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 Assert.Throws<ArgumentNullException>(() => { var entry = repo.Index[null]; });
                 Assert.Throws<ArgumentException>(() => { var entry = repo.Index[string.Empty]; });
@@ -300,7 +300,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void StageFileWithBadParamsThrows()
         {
-            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).DirectoryPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 Assert.Throws<ArgumentException>(() => repo.Index.Stage(string.Empty));
                 Assert.Throws<ArgumentNullException>(() => repo.Index.Stage(null));
@@ -310,7 +310,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void UnstagingFileWithBadParamsThrows()
         {
-            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).DirectoryPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo(Constants.StandardTestRepoWorkingDirName).RepositoryPath))
             {
                 Assert.Throws<ArgumentException>(() => repo.Index.Stage(string.Empty));
                 Assert.Throws<ArgumentNullException>(() => repo.Index.Stage(null));

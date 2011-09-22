@@ -10,7 +10,7 @@ namespace LibGit2Sharp.Tests.TestHelpers
         {
             sourceZipFile = sourceZipFile ?? Constants.BareTestRepoName;
 
-            var extractor = new SevenZipExtractor(sourceZipFile);
+            var extractor = new SevenZipExtractor(Path.Combine(Constants.TestRepoPath, sourceZipFile));
             extractor.ExtractArchive(DirectoryPath);
 
             RepositoryPath = (IsGitWorkingDir() ? Path.Combine(DirectoryPath, ".git") : DirectoryPath);
@@ -24,17 +24,20 @@ namespace LibGit2Sharp.Tests.TestHelpers
             return di.Exists;
         }
 
-        static Dictionary<string, TemporaryCloneOfTestRepo> readOnlyRepoCopies;
+        static object _gate = 42;
+        static Dictionary<string, TemporaryCloneOfTestRepo> readOnlyRepoCopies = new Dictionary<string, TemporaryCloneOfTestRepo>();
         public static TemporaryCloneOfTestRepo ReadOnlyRepo(string sourceZipFile = null)
         {
-            var key = sourceZipFile ?? "__NULL__";
-            if (readOnlyRepoCopies.ContainsKey(key))
+            lock(_gate)
             {
-                return readOnlyRepoCopies[key];
-            }
+                var key = sourceZipFile ?? "__NULL__";
+                if (readOnlyRepoCopies.ContainsKey(key))
+                {
+                    return readOnlyRepoCopies[key];
+                }
 
-            return (readOnlyRepoCopies[key] = new TemporaryCloneOfTestRepo(sourceZipFile));
+                return (readOnlyRepoCopies[key] = new TemporaryCloneOfTestRepo(sourceZipFile));
+            }
         }
     }
-
 }
