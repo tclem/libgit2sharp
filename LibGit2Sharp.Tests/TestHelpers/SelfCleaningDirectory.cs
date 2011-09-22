@@ -16,12 +16,10 @@ namespace LibGit2Sharp.Tests.TestHelpers
                 throw new InvalidOperationException(string.Format("Directory '{0}' already exists.", path));
             }
 
-            DirectoryPath = path;
-            RootedDirectoryPath = Path.GetFullPath(path);
+            DirectoryPath = Path.GetFullPath(path);
         }
 
         public string DirectoryPath { get; private set; }
-        public string RootedDirectoryPath { get; private set; }
 
         #region IDisposable Members
 
@@ -39,7 +37,13 @@ namespace LibGit2Sharp.Tests.TestHelpers
 
         protected static string BuildTempPath()
         {
-            return Path.Combine(Constants.TemporaryReposPath, Guid.NewGuid().ToString().Substring(0, 8));
+            var di = new DirectoryInfo(Path.Combine(Path.GetTempPath(), "LibGit2Sharp-" + Guid.NewGuid().ToString().Substring(0, 8)));
+            if (!di.Exists)
+            {
+                di.Create();
+            }
+
+            return di.FullName;
         }
     }
 }
