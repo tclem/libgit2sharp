@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using NUnit.Framework;
 using SevenZip;
 
 namespace LibGit2Sharp.Tests.TestHelpers
@@ -11,6 +12,12 @@ namespace LibGit2Sharp.Tests.TestHelpers
         {
             // Do the set up in the static ctor so it only happens once
             SetUpTestEnvironment();
+        }
+        
+        [TearDown]
+        public void DestroyReadOnlyRepos()
+        {
+            TemporaryCloneOfTestRepo.DisposeReadOnlyRepos();
         }
 
         static bool sevenZipIsExtracted;
@@ -25,7 +32,7 @@ namespace LibGit2Sharp.Tests.TestHelpers
             sevenZipIsExtracted = true;
         }
 
-        public static void Initialize7Zip()
+        static void Initialize7Zip()
         {
             string sevenZipPath = GetPathTo7ZipNative();
             if (sevenZipPath == null)
