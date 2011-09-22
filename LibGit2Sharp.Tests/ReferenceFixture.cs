@@ -108,7 +108,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CreateWithEmptyStringForTargetThrows()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 Assert.Throws<ArgumentException>(() => repo.Refs.Create("refs/heads/newref", string.Empty));
             }
@@ -117,7 +117,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CreateWithEmptyStringThrows()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 Assert.Throws<ArgumentException>(() => repo.Refs.Create(string.Empty, "refs/heads/master"));
             }
@@ -126,7 +126,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CreateWithNullForTargetThrows()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 Assert.Throws<ArgumentNullException>(() => repo.Refs.Create("refs/heads/newref", null));
             }
@@ -135,7 +135,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CreateWithNullStringThrows()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 Assert.Throws<ArgumentNullException>(() => repo.Refs.Create(null, "refs/heads/master"));
             }
@@ -187,7 +187,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void DeleteWithEmptyNameThrows()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 Assert.Throws<ArgumentException>(() => repo.Refs.Delete(string.Empty));
             }
@@ -196,7 +196,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void DeleteWithNullNameThrows()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 Assert.Throws<ArgumentNullException>(() => repo.Refs.Delete(null));
             }
@@ -205,7 +205,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanListAllReferences()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 foreach (var r in repo.Refs)
                 {
@@ -219,7 +219,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanResolveHeadByName()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 var head = (SymbolicReference) repo.Refs["HEAD"];
                 head.ShouldNotBeNull();
@@ -240,7 +240,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanResolveReferenceToALightweightTag()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 var lwTag = (DirectReference) repo.Refs["refs/tags/lw"];
                 lwTag.ShouldNotBeNull();
@@ -254,7 +254,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanResolveReferenceToAnAnnotatedTag()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 var annTag = (DirectReference) repo.Refs["refs/tags/test"];
                 annTag.ShouldNotBeNull();
@@ -268,7 +268,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void CanResolveRefsByName()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 var master = (DirectReference) repo.Refs["refs/heads/master"];
                 master.ShouldNotBeNull();
@@ -282,7 +282,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void ResolvingWithEmptyStringThrows()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 Assert.Throws<ArgumentException>(() => { var head = repo.Refs[string.Empty]; });
             }
@@ -291,7 +291,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void ResolvingWithNullThrows()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 Assert.Throws<ArgumentNullException>(() => { var head = repo.Refs[null]; });
             }
@@ -357,7 +357,7 @@ namespace LibGit2Sharp.Tests
         public void UpdatingASymbolicRefWithOidFails()
         {
             const string masterRef = "refs/heads/master";
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 Assert.Throws<ArgumentException>(() => repo.Refs.UpdateTarget(masterRef, "refs/heads/test"));
             }
@@ -366,7 +366,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void UpdatingAReferenceTargetWithBadParametersFails()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 Assert.Throws<ArgumentException>(() => repo.Refs.UpdateTarget(string.Empty, "refs/heads/packed"));
                 Assert.Throws<ArgumentException>(() => repo.Refs.UpdateTarget("master", string.Empty));
@@ -422,7 +422,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void MovingANonExistingReferenceThrows()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 Assert.Throws<ApplicationException>(() => repo.Refs.Move("refs/tags/i-am-void", "refs/atic/tagtest"));
             }
@@ -447,7 +447,7 @@ namespace LibGit2Sharp.Tests
         [Test]
         public void BlindlyOverwritingAExistingReferenceThrows()
         {
-            using (var repo = new Repository(Constants.BareTestRepoPath))
+            using (var repo = new Repository(TemporaryCloneOfTestRepo.ReadOnlyRepo().DirectoryPath))
             {
                 Assert.Throws<ApplicationException>(() => repo.Refs.Move("refs/heads/packed", "refs/heads/br2"));
             }

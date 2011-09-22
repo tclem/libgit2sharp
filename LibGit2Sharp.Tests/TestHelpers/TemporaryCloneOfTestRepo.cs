@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using SevenZip;
 
 namespace LibGit2Sharp.Tests.TestHelpers
@@ -21,6 +22,18 @@ namespace LibGit2Sharp.Tests.TestHelpers
         {
             var di = new DirectoryInfo(Path.Combine(DirectoryPath, ".git"));
             return di.Exists;
+        }
+
+        static Dictionary<string, TemporaryCloneOfTestRepo> readOnlyRepoCopies;
+        public static TemporaryCloneOfTestRepo ReadOnlyRepo(string sourceZipFile = null)
+        {
+            var key = sourceZipFile ?? "__NULL__";
+            if (readOnlyRepoCopies.ContainsKey(key))
+            {
+                return readOnlyRepoCopies[key];
+            }
+
+            return (readOnlyRepoCopies[key] = new TemporaryCloneOfTestRepo(sourceZipFile));
         }
     }
 
