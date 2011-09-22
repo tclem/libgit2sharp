@@ -13,7 +13,7 @@ namespace LibGit2Sharp.Tests.TestHelpers
         {
             if (Directory.Exists(path))
             {
-                throw new InvalidOperationException("Directory '{0}' already exists.");
+                throw new InvalidOperationException(String.Format("Directory '{0}' already exists.", path));
             }
 
             DirectoryPath = Path.GetFullPath(path);
@@ -27,7 +27,7 @@ namespace LibGit2Sharp.Tests.TestHelpers
         {
             if (!Directory.Exists(DirectoryPath))
             {
-                throw new InvalidOperationException("Directory '{0}' doesn't exist any longer.");
+                throw new InvalidOperationException(String.Format("Directory '{0}' doesn't exist any longer.", DirectoryPath));
             }
 
             DirectoryHelper.DeleteDirectory(DirectoryPath);
