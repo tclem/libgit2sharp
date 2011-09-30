@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbbreviatedObjectId.cs" />
+    <Compile Include="AssemblyExtensions.cs" />
     <Compile Include="Blob.cs" />
     <Compile Include="Branch.cs" />
     <Compile Include="BranchCollection.cs" />
@@ -118,10 +119,9 @@
     <CodeAnalysisDictionary Include="CustomDictionary.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Lib\git2.dll">
+    <EmbeddedResource Include="..\Lib\git2.dll">
       <Link>git2.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
