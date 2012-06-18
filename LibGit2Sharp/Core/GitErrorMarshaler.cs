@@ -6,7 +6,6 @@ namespace LibGit2Sharp.Core
     internal class GitErrorMarshaler : ICustomMarshaler
     {
         bool shouldFree = true;
-        static readonly GitErrorMarshaler staticInstance = new GitErrorMarshaler();
 
         public void CleanUpManagedData(object managedObj)
         {
@@ -49,7 +48,7 @@ namespace LibGit2Sharp.Core
 
         public static ICustomMarshaler GetInstance(string cookie)
         {
-            return staticInstance;
+            return new GitErrorMarshaler();
         }
     }
 }
