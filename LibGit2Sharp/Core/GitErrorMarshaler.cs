@@ -5,6 +5,7 @@ namespace LibGit2Sharp.Core
 {
     internal class GitErrorMarshaler : ICustomMarshaler
     {
+        bool shouldFree = true;
         static readonly GitErrorMarshaler staticInstance = new GitErrorMarshaler();
 
         public void CleanUpManagedData(object managedObj)
@@ -13,7 +14,10 @@ namespace LibGit2Sharp.Core
 
         public void CleanUpNativeData(IntPtr pNativeData)
         {
-            Marshal.FreeHGlobal(pNativeData);
+            if(shouldFree)
+            {
+                Marshal.FreeHGlobal(pNativeData);
+            }
         }
 
         public int GetNativeDataSize()
@@ -33,7 +37,14 @@ namespace LibGit2Sharp.Core
 
         protected GitError NativeToGitError(IntPtr pNativeData)
         {
-            return (GitError)Marshal.PtrToStructure(pNativeData, typeof(GitError));
+            var res = (GitError)Marshal.PtrToStructure(pNativeData, typeof(GitError));
+
+            if(res == null)
+            {
+                shouldFree = false;
+            }
+
+            return res;
         }
 
         public static ICustomMarshaler GetInstance(string cookie)
