@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace LibGit2Sharp.Core
@@ -8,6 +10,42 @@ namespace LibGit2Sharp.Core
         const string libgit2 = "git2";
 
         #region Public Methods
+
+        static NativeMethods()
+        {
+            var fi = new FileInfo(GetPathForLibGit2());
+
+            // NB: This is necessary for unit test runners 
+            // (*cough* Resharper *cough*) that love to put DLLs in bizarre 
+            // places. Make sure the native DLL loader can find git2.dll
+            Environment.SetEnvironmentVariable("PATH",
+                String.Format("{0}{1}{2}", Environment.GetEnvironmentVariable("PATH"), Path.PathSeparator, fi.Directory.FullName));
+
+            if (fi.Exists)
+            {
+                return;
+            }
+
+            try
+            {
+                (Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly())
+                    .ExtractResourceToFile("LibGit2Sharp.git2.dll", fi.FullName);
+            }
+            catch(Exception ex)
+            {
+                // NB: If something goes wrong writing out the file, we'll 
+                // just hope for the best (i.e. that git2 is in %PATH%)
+                if (!(ex is AccessViolationException) && !(ex is IOException))
+                {
+                    throw;
+                }
+            }
+        }
+
+        static string GetPathForLibGit2()
+        {
+            return Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "git2.dll");
+        }
 
         [DllImport(libgit2)]
         public static extern IntPtr git_blob_rawcontent(IntPtr blob);
