@@ -38,12 +38,16 @@
     <Reference Include="nunit.framework">
       <HintPath>..\Lib\NUnit\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="SevenZipSharp">
+      <HintPath>..\packages\SevenZipSharp.0.64\lib\SevenZipSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConfigurationFixture.cs" />
     <Compile Include="LazyFixture.cs" />
+    <Compile Include="TestHelpers\AssemblyExtensions.cs" />
     <Compile Include="RemoteFixture.cs" />
     <Compile Include="TestHelpers\BaseFixture.cs" />
     <Compile Include="BlobFixture.cs" />
@@ -69,6 +73,12 @@
       <Project>{EE6ED99F-CB12-4683-B055-D28FC7357A34}</Project>
       <Name>LibGit2Sharp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="data\7z.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

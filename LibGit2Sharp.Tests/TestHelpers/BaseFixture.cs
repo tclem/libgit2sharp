@@ -1,4 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Reflection;
+using NUnit.Framework;
+using SevenZip;
 
 namespace LibGit2Sharp.Tests.TestHelpers
 {
@@ -9,34 +13,11 @@ namespace LibGit2Sharp.Tests.TestHelpers
             // Do the set up in the static ctor so it only happens once
             SetUpTestEnvironment();
         }
-
-        private static void SetUpTestEnvironment()
+        
+        [TearDown]
+        public void DestroyReadOnlyRepos()
         {
-            var source = new DirectoryInfo(@"../../../Resources");
-            var target = new DirectoryInfo(@"Resources");
-
-            if (target.Exists)
-            {
-                target.Delete(recursive: true);
-            }
-
-            DirectoryHelper.CopyFilesRecursively(source, target);
-
-            // The test repo under source control has its .git folder renamed to dot_git to avoid confusing git,
-            // so we need to rename it back to .git in our copy under the target folder
-
-            string tempDotGit = Path.Combine(Constants.StandardTestRepoWorkingDirPath, "dot_git");
-            Directory.Move(tempDotGit, Constants.StandardTestRepoPath);
-
-            // Hack! Those test files are part of the repository. When checked out on Windows with core.autocrlf config set to true, 
-            // LF are replace with CRLF. As git_status_xxx() doesn't handle LF/CRLF yet, we regenerate those files with a LF line ending character.
-            File.WriteAllText(Path.Combine(Constants.StandardTestRepoWorkingDirPath, "1/branch_file.txt"), "hi\n");
-            File.WriteAllText(Path.Combine(Constants.StandardTestRepoWorkingDirPath, "branch_file.txt"), "hi\n");
-            File.WriteAllText(Path.Combine(Constants.StandardTestRepoWorkingDirPath, "new.txt"), "my new file\n");
-            File.WriteAllText(Path.Combine(Constants.StandardTestRepoWorkingDirPath, "new_tracked_file.txt"), "a new file\n");
-            File.WriteAllText(Path.Combine(Constants.StandardTestRepoWorkingDirPath, "new_tracked_file.txt"), "a new file\n");
-            File.WriteAllText(Path.Combine(Constants.StandardTestRepoWorkingDirPath, "modified_staged_file.txt"), "a change\nmore files!\n");
-            File.WriteAllText(Path.Combine(Constants.StandardTestRepoWorkingDirPath, "README"), "hey there\n");
+            TemporaryCloneOfTestRepo.DisposeReadOnlyRepos();
         }
 
         protected void CreateCorruptedDeadBeefHead(string repoPath)
@@ -45,5 +26,59 @@ namespace LibGit2Sharp.Tests.TestHelpers
             string headPath = string.Format("{0}refs/heads/{1}", repoPath, deadbeef);
             File.WriteAllText(headPath, string.Format("{0}{0}{0}{0}{0}\n", deadbeef));
         }
+
+        static bool sevenZipIsExtracted;
+        static void SetUpTestEnvironment()
+        {
+            if (sevenZipIsExtracted)
+            {
+                return;
+            }
+
+            Initialize7Zip();
+            sevenZipIsExtracted = true;
+        }
+
+        static void Initialize7Zip()
+        {
+            string sevenZipPath = GetPathTo7ZipNative();
+            if (sevenZipPath == null)
+            {
+                throw new Exception("Can't find or extract 7Zip");
+            }
+
+            SevenZipBase.SetLibraryPath(sevenZipPath);
+        }
+
+        static string GetPathTo7ZipNative()
+        {
+            // Is it already here? Just return it
+            var fi = new FileInfo(@".\7z.dll");
+            if (fi.Exists)
+            {
+                return fi.FullName;
+            }
+
+            // Let's try to extract it to the same folder as the test DLL - if 
+            // it doesn't work, we will fall back to a temp folder
+            var outPath = Path.Combine(GetTestDllDirectory(), "7z.dll");
+
+            string ret = null;
+            if ((ret = AssemblyExtensions.ExtractResourceToFile(null, "LibGit2Sharp.Tests.data.7z.dll", outPath)) != null)
+            {
+                return ret;
+            }
+            
+            outPath = Path.GetTempFileName();
+            return AssemblyExtensions.ExtractResourceToFile(null, "LibGit2Sharp.Tests.data.7z.dll", outPath);
+        }
+
+        static string GetTestDllDirectory()
+        {
+            var di = new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            return di.FullName;
+        }
+
+        
     }
 }
